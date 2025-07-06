@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UrbanStyle | E-Commerce Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #3a0ca3;
+            --secondary: #f72585;
+            --accent: #4cc9f0;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f5f5f5;
+            color: var(--dark);
+            transition: all 0.3s ease;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .cart-item {
+            transition: all 0.2s ease;
+        }
+        
+        .cart-item:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        
+        .navbar {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .mobile-menu {
+            transition: all 0.3s ease;
+        }
+        
+        .skeleton-loader {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.6;
+            }
+            50% {
+                opacity: 0.3;
+            }
+        }
+        
+        .category-btn.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .footer-links li:hover {
+            color: var(--secondary);
+        }
+        
+        .cart-badge {
+            animation: pop 0.4s ease;
+        }
+        
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        
+        .toast {
+            animation: slideIn 0.3s, fadeOut 0.5s 2.5s;
+        }
+        
+        @keyframes slideIn {
+            from { right: -100px; opacity: 0; }
+            to { right: 20px; opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        .cart-item-enter {
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .star-rating {
+            color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar fixed top-0 left-0 right-0 z-50 border-b border-gray-200">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center">
+                <a href="#" class="text-2xl font-bold text-purple-800 flex items-center">
+                    <span class="bg-purple-600 text-white px-2 py-1 rounded mr-2">US</span>
+                    UrbanStyle
+                </a>
+            </div>
+            
+            <div class="hidden md:flex space-x-6">
+                <a href="#" class="text-gray-700 hover:text-purple-600 font-medium">Home</a>
+                <a href="#" class="text-gray-700 hover:text-purple-600 font-medium">Shop</a>
+                <a href="#" class="text-gray-700 hover:text-purple-600 font-medium">Collections</a>
+                <a href="#" class="text-gray-700 hover:text-purple-600 font-medium">About</a>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <button id="search-btn" class="p-2 text-gray-600 hover:text-purple-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </button>
+                <button id="cart-btn" class="p-2 text-gray-600 hover:text-purple-600 relative">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <span id="cart-count" class="absolute -top-1 -right-1 bg-purple-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center cart-badge">0</span>
+                </button>
+                <button id="mobile-menu-btn" class="md:hidden p-2 text-gray-600 hover:text-purple-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="mobile-menu md:hidden hidden bg-white shadow-lg">
+            <div class="container mx-auto px-4 py-3 flex flex-col space-y-3">
+                <a href="#" class="text-gray-700 hover:text-purple-600 font-medium py-2 border-b border-gray-100">Home</a>
+                <a href="#" class="text-gray-700 hover:text-purple-600 font-medium py-2 border-b border-gray-100">Shop</a>
+                <a href="#" class="text-gray-700 hover:text-purple-600 font-medium py-2 border-b border-gray-100">Collections</a>
+                <a href="#" class="text-gray-700 hover:text-purple-600 font-medium py-2 border-b border-gray-100">About</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Search Modal -->
+    <div id="search-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-start pt-20 justify-center">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl mx-4">
+            <div class="p-4 flex">
+                <input type="text" placeholder="Search products..." class="flex-grow px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-purple-600">
+                <button class="bg-purple-600 text-white px-4 py-2 rounded-r-lg hover:bg-purple-700">Search</button>
+            </div>
+            <div class="p-4 border-t border-gray-200">
+                <p class="text-gray-500">Popular searches: Shoes, Watches, Jackets</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Sidebar -->
+    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-full md:w-96 bg-white shadow-lg z-50 transform translate-x-full transition-transform duration-300 overflow-y-auto">
+        <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+            <h3 class="text-lg font-semibold">Your Cart (<span id="sidebar-cart-count">0</span>)</h3>
+            <button id="close-cart" class="text-gray-500 hover:text-red-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        
+        <div id="cart-items" class="p-4">
+            <div class="text-center py-10">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <p class="mt-2 text-gray-500">Your cart is empty</p>
+            </div>
+        </div>
+        
+        <div class="p-4 border-t border-gray-200 mt-auto">
+            <div class="flex justify-between mb-2">
+                <span class="text-gray-600">Subtotal:</span>
+                <span id="cart-subtotal" class="font-semibold">$0.00</span>
+            </div>
+            <div class="flex justify-between mb-4">
+                <span class="text-gray-600">Shipping:</span>
+                <span class="font-semibold">Free</span>
+            </div>
+            <div class="flex justify-between text-lg font-bold mb-4">
+                <span>Total:</span>
+                <span id="cart-total" class="text-purple-600">$0.00</span>
+            </div>
+            <button id="checkout-btn" class="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                Checkout
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast fixed top-20 right-5 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg hidden z-50">
+        <div class="flex items-center">
+            <i class="fas fa-check-circle mr-2"></i>
+            <span>Item added to cart!</span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="mt-16">
+        <!-- Hero Section -->
+        <section class="relative bg-gradient-to-r from-purple-500 to-blue-500 text-white py-20">
+            <div class="container mx-auto px-4 text-center">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">Modern Styles for Modern Lives</h1>
+                <p class="text-xl mb-8 max-w-2xl mx-auto">
+                    Discover curated collections of premium fashion and accessories handpicked for your unique style.
+                </p>
+                <button class="bg-white text-purple-600 font-semibold px-6 py-3 rounded-lg hover:bg-gray-100 transition-all transform hover:scale-105">
+                    Shop Now
+                </button>
+            </div>
+        </section>
+
+        <!-- Category Navigation -->
+        <section class="py-6 bg-white sticky top-16 z-10 shadow-sm">
+            <div class="container mx-auto px-4">
+                <div class="flex overflow-x-auto space-x-2 pb-2 scrollbar-hide">
+                    <button class="category-btn active px-4 py-2 rounded-full bg-purple-100 text-purple-800 font-medium whitespace-nowrap" data-category="all">
+                        All Items
+                    </button>
+                    <button class="category-btn px-4 py-2 rounded-full bg-gray-100 text-gray-800 font-medium whitespace-nowrap" data-category="men">
+                        Men's Fashion
+                    </button>
+                    <button class="category-btn px-4 py-2 rounded-full bg-gray-100 text-gray-800 font-medium whitespace-nowrap" data-category="women">
+                        Women's Fashion
+                    </button>
+                    <button class="category-btn px-4 py-2 rounded-full bg-gray-100 text-gray-800 font-medium whitespace-nowrap" data-category="electronics">
+                        Electronics
+                    </button>
+                    <button class="category-btn px-4 py-2 rounded-full bg-gray-100 text-gray-800 font-medium whitespace-nowrap" data-category="accessories">
+                        Accessories
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Products Section -->
+        <section class="py-12 bg-gray-50">
+            <div class="container mx-auto px-4">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-2xl font-bold">Featured Products</h2>
+                    <div class="flex items-center">
+                        <label for="sort" class="mr-2 text-gray-600">Sort by:</label>
+                        <select id="sort" class="border border-gray-300 rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-purple-600">
+                            <option value="featured">Featured</option>
+                            <option value="price-low">Price: Low to High</option>
+                            <option value="price-high">Price: High to Low</option>
+                            <option value="newest">Newest Arrivals</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="products-container">
+                    <!-- Product cards will be dynamically inserted here -->
+                </div>
+                
+                <div class="mt-12 text-center">
+                    <button id="load-more" class="bg-white border border-purple-600 text-purple-600 px-6 py-3 rounded-lg hover:bg-purple-50 transition-all">
+                        Load More Products
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Collection -->
+        <section class="py-12 bg-white">
+            <div class="container mx-auto px-4">
+                <h2 class="text-2xl font-bold mb-8">Spring Collection</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="relative rounded-xl overflow-hidden h-80">
+                        <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Spring collection showcase with light pastel colored clothing displayed on models in a sunny outdoor setting" class="w-full h-full object-cover" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 p-6 text-white">
+                            <h3 class="text-xl font-bold mb-2">New Arrivals</h3>
+                            <p class="mb-4">Browse our latest collection for Spring</p>
+                            <button class="bg-white text-purple-600 font-semibold px-4 py-2 rounded-lg hover:bg-gray-100">
+                                Shop Now
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="relative rounded-xl overflow-hidden h-80">
+                        <img src="https://images.unsplash.com/photo-1560241804-02b7b1c9c7a9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80" alt="Summer essentials collection featuring sunglasses, hats, and beachwear arranged neatly on a sandy surface" class="w-full h-full object-cover" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 p-6 text-white">
+                            <h3 class="text-xl font-bold mb-2">Summer Essentials</h3>
+                            <p class="mb-4">Everything you need for the sunny days</p>
+                            <button class="bg-white text-purple-600 font-semibold px-4 py-2 rounded-lg hover:bg-gray-100">
+                                Shop Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Newsletter Section -->
+        <section class="py-12 bg-gray-100">
+            <div class="container mx-auto px-4 text-center max-w-3xl">
+                <h2 class="text-2xl font-bold mb-4">Stay Updated</h2>
+                <p class="text-gray-600 mb-6">
+                    Subscribe to our newsletter and get 10% off your first purchase. Plus, be the first to know about new arrivals and exclusive offers.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
+                    <input type="email" placeholder="Your email address" class="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600">
+                    <button class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-all">
+                        Subscribe
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white pt-12 pb-6">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">UrbanStyle</h3>
+                    <p class="text-gray-400">
+                        Bringing you the latest in fashion and lifestyle since 2015. We're committed to quality and sustainability.
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Customer Service</h4>
+                    <ul class="footer-links">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Contact Us</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Returns</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Shipping Info</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">FAQs</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Follow Us</h4>
+                    <ul class="footer-links">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Facebook</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Instagram</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Twitter</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Pinterest</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Privacy Policy</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="text-center text-gray-400">
+                <p>&copy; 2025 UrbanStyle. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Enhanced JavaScript for UrbanStyle E-Commerce Platform
+        // DOM Elements
+        const searchBtn = document.getElementById('search-btn');
+        const searchModal = document.getElementById('search-modal');
+        const closeCart = document.getElementById('close-cart');
+        const cartBtn = document.getElementById('cart-btn');
+        const cartSidebar = document.getElementById('cart-sidebar');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const loadMoreBtn = document.getElementById('load-more');
+        const productsContainer = document.getElementById('products-container');
+        const sortSelect = document.getElementById('sort');
+        const categoryBtns = document.querySelectorAll('.category-btn');
+        const cartCount = document.getElementById('cart-count');
+        const sidebarCartCount = document.getElementById('sidebar-cart-count');
+        const cartItems = document.getElementById('cart-items');
+        const cartSubtotal = document.getElementById('cart-subtotal');
+        const cartTotal = document.getElementById('cart-total');
+        const checkoutBtn = document.getElementById('checkout-btn');
+        const toast = document.getElementById('toast');
+
+        // Product data
+        const products = [
+            { 
+                id: 1, 
+                name: 'Premium Leather Jacket', 
+                price: 129.99, 
+                image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80', 
+                category: 'men',
+                rating: 4.5,
+                description: 'High-quality leather jacket with modern design'
+            },
+            { 
+                id: 2, 
+                name: 'Designer Handbag', 
+                price: 89.99, 
+                image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80', 
+                category: 'women',
+                rating: 4.7,
+                description: 'Elegant designer handbag with multiple compartments'
+            },
+            { 
+                id: 3, 
+                name: 'Wireless Headphones', 
+                price: 79.99, 
+                image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80', 
+                category: 'electronics',
+                rating: 4.3,
+                description: 'Noise-cancelling wireless headphones with 30h battery'
+            },
+            { 
+                id: 4, 
+                name: 'Classic Wrist Watch', 
+                price: 149.99, 
+                image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1099&q=80', 
+                category: 'accessories',
+                rating: 4.8,
+                description: 'Luxury wristwatch with sapphire crystal glass'
+            },
+            { 
+                id: 5, 
+                name: 'Men\'s Running Shoes', 
+                price: 89.99, 
+                image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80', 
+                category: 'men',
+                rating: 4.6,
+                description: 'Lightweight running shoes with extra cushioning'
+            },
+            { 
+                id: 6, 
+                name: 'Women\'s Summer Dress', 
+                price: 59.99, 
+                image: 'https://images.unsplash.com/photo-1572804013427-4d7ca7268217?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1165&q=80', 
+                category: 'women',
+                rating: 4.4,
+                description: 'Lightweight summer dress with floral pattern'
+            },
+            { 
+                id: 7, 
+                name: 'Smartphone 128GB', 
+                price: 499.99, 
+                image: 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80', 
+                category: 'electronics',
+                rating: 4.9,
+                description: 'Latest smartphone with dual camera system'
+            },
+            { 
+                id: 8, 
+                name: 'Sunglasses', 
+                price: 49.99, 
+                image: 'https://images.unsplash.com/photo-1577803645773-f96470509666?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80', 
+                category: 'accessories',
+                rating: 4.2,
+                description: 'UV protection sunglasses with polarized lenses'
+            }
+        ];
+
+        // Initialize cart
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let filteredProducts = [...products];
+        let currentCategory = 'all';
+
+        // Initialize the application
+        function init() {
+            renderProducts();
+            updateCartCount();
+            setupEventListeners();
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Search modal
+            searchBtn.addEventListener('click', () => {
+                searchModal.classList.toggle('hidden');
+            });
+
+            // Cart functionality
+            closeCart.addEventListener('click', () => {
+                cartSidebar.style.transform = 'translateX(100%)';
+            });
+
+            cartBtn.addEventListener('click', () => {
+                cartSidebar.style.transform = 'translateX(0)';
+                renderCartItems();
+            });
+
+            // Mobile menu
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Load more products
+            loadMoreBtn.addEventListener('click', () => {
+                // Simulate loading more products
+                setTimeout(() => {
+                    const moreProducts = [
+                        { 
+                            id: 9, 
+                            name: 'Casual T-Shirt', 
+                            price: 24.99, 
+                            image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1160&q=80', 
+                            category: 'men',
+                            rating: 4.1,
+                            description: 'Comfortable cotton t-shirt for everyday wear'
+                        },
+                        { 
+                            id: 10, 
+                            name: 'Women\'s Denim Jacket', 
+                            price: 69.99, 
+                            image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1136&q=80', 
+                            category: 'women',
+                            rating: 4.6,
+                            description: 'Classic denim jacket with modern cut'
+                        }
+                    ];
+                    
+                    // Add to filtered products and re-render
+                    moreProducts.forEach(product => {
+                        filteredProducts.push(product);
+                        products.push(product);
+                    });
+                    
+                    renderProducts();
+                    
+                    // Disable button after loading all products
+                    loadMoreBtn.disabled = true;
+                    loadMoreBtn.textContent = 'All Products Loaded';
+                    loadMoreBtn.classList.add('opacity-50');
+                }, 1000);
+            });
+
+            // Sort products
+            sortSelect.addEventListener('change', (e) => {
+                sortProducts(e.target.value);
+                renderProducts();
+            });
+
+            // Category filtering
+            categoryBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Remove active class from all buttons
+                    categoryBtns.forEach(b => b.classList.remove('active'));
+                    // Add active class to clicked button
+                    btn.classList.add('active');
+                    
+                    // Filter products by category
+                    const category = btn.dataset.category;
+                    currentCategory = category;
+                    filterProductsByCategory(category);
+                });
+            });
+
+            // Close modal when clicking outside
+            searchModal.addEventListener('click', (e) => {
+                if (e.target === searchModal) {
+                    searchModal.classList.add('hidden');
+                }
+            });
+
+            // Newsletter form
+            const newsletterForm = document.querySelector('.newsletter-section form');
+            if (newsletterForm) {
+                newsletterForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const email = newsletterForm.querySelector('input[type="email"]').value;
+                    
+                    if (validateEmail(email)) {
+                        // Show success message
+                        showToast('Subscribed successfully!', 'green');
+                        newsletterForm.reset();
+                    } else {
+                        showToast('Please enter a valid email', 'red');
+                    }
+                });
+            }
+        }
+
+        // Render products to the page
+        function renderProducts() {
+            productsContainer.innerHTML = '';
+            
+            filteredProducts.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card bg-white rounded-lg shadow-md p-4 transition-all duration-300';
+                productCard.innerHTML = `
+                    <div class="relative">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover rounded-t-lg">
+                        <div class="absolute top-2 right-2 bg-white rounded-full p-1 shadow-md">
+                            <i class="fas fa-heart text-gray-300 hover:text-red-500 cursor-pointer"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="flex justify-between items-start">
+                            <h3 class="text-lg font-semibold truncate">${product.name}</h3>
+                            <span class="text-purple-600 font-bold">$${product.price.toFixed(2)}</span>
+                        </div>
+                        <div class="flex items-center mt-1">
+                            <div class="star-rating">
+                                ${renderRatingStars(product.rating)}
+                            </div>
+                            <span class="text-gray-500 text-sm ml-1">${product.rating}</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mt-2 truncate">${product.description}</p>
+                        <button data-id="${product.id}" class="add-to-cart mt-4 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 w-full transition-colors">
+                            Add to Cart
+                        </button>
+                    </div>
+                `;
+                productsContainer.appendChild(productCard);
+            });
+
+            // Add event listeners to the "Add to Cart" buttons
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const productId = parseInt(e.target.dataset.id);
+                    addToCart(productId);
+                });
+            });
+        }
+
+        // Render star rating
+        function renderRatingStars(rating) {
+            let stars = '';
+            const fullStars = Math.floor(rating);
+            const halfStar = rating % 1 >= 0.5;
+            
+            for (let i = 0; i < fullStars; i++) {
+                stars += '<i class="fas fa-star"></i>';
+            }
+            
+            if (halfStar) {
+                stars += '<i class="fas fa-star-half-alt"></i>';
+            }
+            
+            const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+            for (let i = 0; i < emptyStars; i++) {
+                stars += '<i class="far fa-star"></i>';
+            }
+            
+            return stars;
+        }
+
+        // Add product to cart
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            // Check if product is already in cart
+            const existingItem = cart.find(item => item.id === productId);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    image: product.image,
+                    quantity: 1
+                });
+            }
+
+            // Save to localStorage
+            localStorage.setItem('cart', JSON.stringify(cart));
+            
+            // Update UI
+            updateCartCount();
+            
+            // Show success toast
+            showToast('Item added to cart!');
+        }
+
+        // Update cart count in UI
+        function updateCartCount() {
+            const count = cart.reduce((total, item) => total + item.quantity, 0);
+            cartCount.textContent = count;
+            sidebarCartCount.textContent = count;
+            
+            // Add animation class to badge
+            cartCount.classList.add('cart-badge');
+            setTimeout(() => {
+                cartCount.classList.remove('cart-badge');
+            }, 400);
+        }
+
+        // Render cart items in sidebar
+        function renderCartItems() {
+            cartItems.innerHTML = '';
+            
+            if (cart.length === 0) {
+                cartItems.innerHTML = `
+                    <div class="text-center py-10">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <p class="mt-2 text-gray-500">Your cart is empty</p>
+                    </div>
+                `;
+                cartSubtotal.textContent = '$0.00';
+                cartTotal.textContent = '$0.00';
+                checkoutBtn.disabled = true;
+                return;
+            }
+
+            let subtotal = 0;
+
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                subtotal += itemTotal;
+                
+                const cartItem = document.createElement('div');
+                cartItem.className = 'cart-item flex items-center py-4 border-b border-gray-200 cart-item-enter';
+                cartItem.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-contain">
+                    <div class="ml-4 flex-grow">
+                        <h4 class="font-medium">${item.name}</h4>
+                        <div class="flex items-center mt-2">
+                            <button class="decrease-quantity text-gray-500 hover:text-red-500 px-2" data-id="${item.id}">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <span class="quantity mx-2 w-8 text-center">${item.quantity}</span>
+                            <button class="increase-quantity text-gray-500 hover:text-green-500 px-2" data-id="${item.id}">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <span class="text-purple-600 font-medium ml-4">$${itemTotal.toFixed(2)}</span>
+                        </div>
+                    </div>
+                    <button class="remove-item text-gray-400 hover:text-red-500 ml-4" data-id="${item.id}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                cartItems.appendChild(cartItem);
+            });
+
+            cartSubtotal.textContent = `$${subtotal.toFixed(2)}`;
+            cartTotal.textContent = `$${subtotal.toFixed(2)}`; // Since shipping is free
+            checkoutBtn.disabled = false;
+
+            // Add event listeners for cart item buttons
+            document.querySelectorAll('.increase-quantity').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const productId = parseInt(e.target.closest('button').dataset.id);
+                    updateCartItemQuantity(productId, 1);
+                });
+            });
+
+            document.querySelectorAll('.decrease-quantity').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const productId = parseInt(e.target.closest('button').dataset.id);
+                    updateCartItemQuantity(productId, -1);
+                });
+            });
+
+            document.querySelectorAll('.remove-item').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const productId = parseInt(e.target.closest('button').dataset.id);
+                    removeCartItem(productId);
+                });
+            });
+        }
+
+        // Update cart item quantity
+        function updateCartItemQuantity(productId, change) {
+            const itemIndex = cart.findIndex(item => item.id === productId);
+            
+            if (itemIndex !== -1) {
+                cart[itemIndex].quantity += change;
+                
+                // Remove item if quantity is zero or less
+                if (cart[itemIndex].quantity <= 0) {
+                    cart.splice(itemIndex, 1);
+                }
+                
+                // Save to localStorage
+                localStorage.setItem('cart', JSON.stringify(cart));
+                
+                // Update UI
+                updateCartCount();
+                renderCartItems();
+            }
+        }
+
+        // Remove item from cart
+        function removeCartItem(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            
+            // Save to localStorage
+            localStorage.setItem('cart', JSON.stringify(cart));
+            
+            // Update UI
+            updateCartCount();
+            renderCartItems();
+        }
+
+        // Filter products by category
+        function filterProductsByCategory(category) {
+            if (category === 'all') {
+                filteredProducts = [...products];
+            } else {
+                filteredProducts = products.filter(product => product.category === category);
+            }
+            
+            renderProducts();
+        }
+
+        // Sort products
+        function sortProducts(sortBy) {
+            switch (sortBy) {
+                case 'price-low':
+                    filteredProducts.sort((a, b) => a.price - b.price);
+                    break;
+                case 'price-high':
+                    filteredProducts.sort((a, b) => b.price - a.price);
+                    break;
+                case 'newest':
+                    filteredProducts.sort((a, b) => b.id - a.id);
+                    break;
+                default:
+                    // Featured (original order)
+                    filteredProducts = [...products];
+                    if (currentCategory !== 'all') {
+                        filterProductsByCategory(currentCategory);
+                    }
+                    break;
+            }
+        }
+
+        // Show toast notification
+        function showToast(message, color = 'green') {
+            toast.textContent = message;
+            toast.className = `toast fixed top-20 right-5 bg-${color}-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center`;
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Validate email
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
